@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    /* Configurações Base */
+    "target": "es2020",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Onde nosso código vai estar e para onde vai */
+    "rootDir": "./src",
+    "outDir": "./dist",
+    
+    /* Regras Rígidas (Nosso "Personal Trainer") */
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["src"] // Diz ao TS para olhar apenas a pasta 'src'
+}

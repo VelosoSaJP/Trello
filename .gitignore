@@ -1,0 +1,12 @@
+# Ignorar dependências do Backend
+backend/node_modules
+
+# Ignorar dependências do Frontend
+frontend/node_modules
+
+# Ignorar arquivos de "build" (código gerado)
+backend/dist
+frontend/dist
+
+# Ignorar arquivos de ambiente (que terão senhas no futuro)
+.env
