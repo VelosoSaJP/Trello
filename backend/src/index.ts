@@ -20,7 +20,7 @@ app.get('/api/tasks', (request, response) => {
   // Simplesmente retorna nosso array 'db'
   return response.json(db);
 });
-// ROTA 2: Criar uma nova tarefa
+// --------------ROTA 2: Criar uma nova tarefa-------------------
 app.post('/api/tasks', (request, response) => {
   // 1. Pegar os dados do corpo da requisição
   // Usamos a "desestruturação" para pegar o title e content
@@ -55,7 +55,7 @@ app.post('/api/tasks', (request, response) => {
   return response.status(201).json(newTask);
 });
 
-// ROTA 3: Excluir uma tarefa
+// -----------------------ROTA 3: Excluir uma tarefa --------------------------
 app.delete('/api/tasks/:id', (request, response) => {
   // 1. Pegar o ID que veio na URL (nos "parâmetros")
   const { id } = request.params;
@@ -77,6 +77,45 @@ app.delete('/api/tasks/:id', (request, response) => {
   // 5. Enviar uma resposta de sucesso
   // 204 = No Content (Sem Conteúdo). É o padrão para um DELETE bem-sucedido.
   return response.status(204).send();
+});
+
+// -----------------------ROTA 4: Atualizar uma tarefa (UPDATE) -------------------------
+app.put('/api/tasks/:id', (request, response) => {
+  // 1. Pegar o ID da URL
+  const { id } = request.params;
+
+  // 2. Pegar os NOVOS dados do corpo da requisição
+  // Usamos a mesma validação/default do POST
+  const { title, content, status } = request.body;
+
+  // 3. Validação dos campos obrigatórios
+  if (!title || !content || !status) {
+    return response.status(400).json({ 
+      error: "O 'title' e o 'content' são obrigatórios." 
+    });
+  }
+
+  // 4. Encontrar a tarefa no DB
+  const taskIndex = db.findIndex((task) => task.id === id);
+
+  // 5. Se não encontrar, 404
+  if (taskIndex === -1) {
+    return response.status(404).json({ error: 'Tarefa não encontrada.' });
+  }
+
+  // 6. Se encontrou, atualiza o objeto
+  const updatedTask: Task = {
+    ...db[taskIndex], // Pega a tarefa antiga (para manter o 'id')
+    title: title,       // Sobrescreve o title
+    content: content,   // Sobrescreve o content
+    status: status,     // Sobrescreve o status
+  };
+
+  // 7. Coloca a tarefa atualizada de volta no array
+  db[taskIndex] = updatedTask;
+
+  // 8. Retorna a tarefa atualizada
+  return response.json(updatedTask);
 });
 
 // 5. "Ligar" o servidor e fazê-lo "ouvir" a porta definida
