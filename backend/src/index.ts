@@ -55,6 +55,30 @@ app.post('/api/tasks', (request, response) => {
   return response.status(201).json(newTask);
 });
 
+// ROTA 3: Excluir uma tarefa
+app.delete('/api/tasks/:id', (request, response) => {
+  // 1. Pegar o ID que veio na URL (nos "parâmetros")
+  const { id } = request.params;
+
+  // 2. Encontrar o *índice* (a posição) da tarefa no array
+  // findIndex é perfeito para isso
+  const taskIndex = db.findIndex((task) => task.id === id);
+
+  // 3. Validação: E se não encontrar a tarefa?
+  if (taskIndex === -1) {
+    // 404 = Not Found (Não Encontrado)
+    return response.status(404).json({ error: 'Tarefa não encontrada.' });
+  }
+
+  // 4. Se encontrou, remove a tarefa do array
+  // O 'splice' modifica o array original, removendo 1 item na posição 'taskIndex'
+  db.splice(taskIndex, 1);
+
+  // 5. Enviar uma resposta de sucesso
+  // 204 = No Content (Sem Conteúdo). É o padrão para um DELETE bem-sucedido.
+  return response.status(204).send();
+});
+
 // 5. "Ligar" o servidor e fazê-lo "ouvir" a porta definida
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
