@@ -4,7 +4,7 @@ import type { Task } from '../App';
 
 const STATUS_OPTIONS = ["A Fazer", "Em Andamento", "Concluído"];
 
-// 1. ATUALIZAR AS PROPS
+// ATUALIZAR AS PROPS
 interface TaskFormModalProps {
   onClose: () => void;
   onTaskSaved: (task: Task) => void; // Função ÚNICA para salvar (criação ou edição)
@@ -18,7 +18,6 @@ export function TaskFormModal({ onClose, onTaskSaved, taskToEdit }: TaskFormModa
   // Poderíamos adicionar o 'status' aqui também, mas vamos focar no title/content
   const [newStatus, setNewStatus] = useState(STATUS_OPTIONS[0]); // Default "A Fazer"
 
-  // 2. O "PREENCHEDOR" AUTOMÁTICO
   // Este 'useEffect' roda UMA VEZ quando o modal abre
   useEffect(() => {
     if (taskToEdit) {
@@ -34,7 +33,7 @@ export function TaskFormModal({ onClose, onTaskSaved, taskToEdit }: TaskFormModa
     }
   }, [taskToEdit]); // Ele re-roda se 'taskToEdit' mudar
 
-  // 3. O "HANDLESUBMIT" INTELIGENTE
+  
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!newTitle || !newContent) {
@@ -68,7 +67,7 @@ export function TaskFormModal({ onClose, onTaskSaved, taskToEdit }: TaskFormModa
 
       const savedTask: Task = await response.json();
 
-      // 4. Avisa o "Pai" (App.tsx) que a tarefa foi salva
+      // Avisa o "Pai" (App.tsx) que a tarefa foi salva
       onTaskSaved(savedTask);
       onClose(); // Fecha o modal
 
@@ -78,7 +77,7 @@ export function TaskFormModal({ onClose, onTaskSaved, taskToEdit }: TaskFormModa
     }
   }
 
-  // 5. O JSX (Vamos mudar o título e o botão)
+  //O JSX (Vamos mudar o título e o botão)
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center">
       <div className="bg-zinc-800 p-8 rounded-lg shadow-xl max-w-xl w-full">

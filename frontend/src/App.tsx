@@ -67,7 +67,6 @@ function App() {
       throw new Error('Falha ao excluir a tarefa');
     }
 
-    // 4. O "Pulo do Gato" - Atualização Imediata no Frontend
     // Se deu certo, atualizamos o estado 'tasks'
     // 'filter' cria um NOVO array com todos os itens,
     // EXCETO aquele onde 'task.id === id'
@@ -125,7 +124,7 @@ function App() {
             
             {/* NOVO: Wrapper para os botões de ação */}
             <div className="absolute top-2 right-2 flex gap-2">
-              {/* NOVO: Botão de Editar */}
+              {/* Botão de Editar */}
               <button
                 onClick={() => handleOpenEditModal(task)}
                 className="text-zinc-400 hover:text-yellow-500 transition-colors"
@@ -146,17 +145,16 @@ function App() {
               </button>
             </div>
             
-            {/* Conteúdo do Card (não mudou) */}
             <span className="text-xs font-semibold px-2 py-1 bg-blue-500 text-white rounded-full mb-2 inline-block">
               {task.status}
             </span>
-            <h2 className="text-xl font-semibold pt-4">{task.title}</h2> {/* Adicionei um 'pt-4' (padding-top) para não ficar embaixo dos botões */}
+            <h2 className="text-xl font-semibold pt-4">{task.title}</h2> {/* 'pt-4'(padding-top) para não ficar embaixo dos botões */}
             <p className="text-zinc-400">{task.content}</p>
           </div>
         ))}
       </div>
 
-      {/* MODIFICADO: A chamada do Modal agora é inteligente */}
+      {/* MODIFICADO: chamada inteligente tome */}
       {isModalOpen && (
         <TaskFormModal
           onClose={handleCloseModal}
