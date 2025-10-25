@@ -1,11 +1,13 @@
 // 1. Importar o express
 import express from 'express';
 import { db , Task } from './database';
+import cors from 'cors'; // <-- ADICIONA O CORS
 
 // 2. Inicializar o express e colocá-lo na variável 'app'
 const app = express();
 // Middleware para o Express "entender" JSON
 app.use(express.json());
+app.use(cors()); // <-- ADICIONA VALIDAÇÃO DO CORS
 
 // 3. Definir a porta que o servidor vai rodar
 const PORT = 3000;
@@ -23,7 +25,18 @@ app.post('/api/tasks', (request, response) => {
   // 1. Pegar os dados do corpo da requisição
   // Usamos a "desestruturação" para pegar o title e content
   // E aqui o TypeScript brilha: ele sabe que 'body' pode ter 'title' e 'content'
-  const { title, content } = request.body;
+  const { title, content, status } = request.body;
+  //const status = request.body.status || "A Fazer";
+
+  // VALIDAÇÃO!
+  // Checamos se os campos obrigatórios vieram
+  if (!title || !content) {
+    // 400 = Bad Request (Requisição Ruim)
+    // Se não vieram, avisamos o cliente e paramos a execução.
+    return response.status(400).json({ 
+      error: "O 'title' e o 'content' são obrigatórios." 
+    });
+  }
 
   // 2. Criar a nova tarefa com um ID único
   const newTask: Task = {
@@ -31,6 +44,7 @@ app.post('/api/tasks', (request, response) => {
     id: `task_${Date.now()}`, 
     title: title,
     content: content,
+    status: status,
   };
 
   // 3. Adicionar a nova tarefa no nosso "banco de dados"

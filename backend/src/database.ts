@@ -3,6 +3,7 @@ export interface Task {
   id: string;
   title: string;
   content: string;
+  status: string;
 }
 
 // 2. Nosso "Banco de Dados Fake"
