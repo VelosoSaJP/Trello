@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-// 1. Importar nosso novo componente!
 import { TaskFormModal } from './components/TaskFormModal';
+import { Column } from './components/Column';
 
 // 2. A interface agora é usada pelos dois arquivos,
 //    então vamos "exportá-la" para o Modal poder importar
@@ -97,17 +97,18 @@ function App() {
     setIsModalOpen(false);
   }
 
+  const columns = ["A Fazer", "Em Andamento", "Concluído"];
+
   // 4. O JSX (limpo!)
   return (
-    <div className="min-h-screen bg-zinc-900 text-white p-8">
+    // MODIFICADO: min-h-screen agora tem 'overflow-x-auto' para scroll horizontal
+    <div className="min-h-screen bg-zinc-900 text-white p-8 overflow-x-auto">
       
-      {/* Header */}
-      <header className="max-w-xl mx-auto mb-8 flex justify-between items-center">
+      {/* Header (não muda) */}
+      <header className="max-w-6xl mx-auto mb-8 flex justify-between items-center">
         <h1 className="text-5xl font-bold">
           Meu Projeto Trello
         </h1>
-        
-        {/* MODIFICADO: Botão de Criar agora chama a função nova */}
         <button
           onClick={handleOpenCreateModal}
           className="bg-blue-600 hover:bg-blue-700 p-2 rounded-lg font-semibold transition-colors"
@@ -116,45 +117,32 @@ function App() {
         </button>
       </header>
 
-      {/* Lista de Tarefas */}
-      <div className="flex flex-col gap-4 max-w-xl mx-auto">
-        {tasks.map((task) => (
-          // O card 'relative' para os botões 'absolute'
-          <div key={task.id} className="bg-zinc-800 p-4 rounded-lg shadow-md relative">
-            
-            {/* NOVO: Wrapper para os botões de ação */}
-            <div className="absolute top-2 right-2 flex gap-2">
-              {/* Botão de Editar */}
-              <button
-                onClick={() => handleOpenEditModal(task)}
-                className="text-zinc-400 hover:text-yellow-500 transition-colors"
-                title="Editar tarefa"
-              >
-                {/* Ícone de "lápis" */}
-                &#9998; 
-              </button>
-              
-              {/* MODIFICADO: Botão de Excluir (agora junto com o de editar) */}
-              <button
-                onClick={() => handleDelete(task.id)}
-                className="text-zinc-400 hover:text-red-500 transition-colors"
-                title="Excluir tarefa"
-              >
-                {/* Ícone de "X" */}
-                &#10005;
-              </button>
-            </div>
-            
-            <span className="text-xs font-semibold px-2 py-1 bg-blue-500 text-white rounded-full mb-2 inline-block">
-              {task.status}
-            </span>
-            <h2 className="text-xl font-semibold pt-4">{task.title}</h2> {/* 'pt-4'(padding-top) para não ficar embaixo dos botões */}
-            <p className="text-zinc-400">{task.content}</p>
-          </div>
-        ))}
-      </div>
+      {/* MODIFICADO: A "Lista de Tarefas" agora é um "Quadro" (Board) */}
+      {/* 'flex gap-6' vai alinhar as colunas lado a lado */}
+      <main className="flex gap-6 max-w-6xl mx-auto">
+        
+        {/* Mapeamos o array de COLUNAS (e não de tarefas) */}
+        {columns.map((columnTitle) => {
+          
+          // 1. FILTRAMOS as tarefas que pertencem a esta coluna
+          const columnTasks = tasks.filter(
+            (task) => task.status === columnTitle
+          );
 
-      {/* MODIFICADO: chamada inteligente tome */}
+          // 2. Renderizamos o componente Coluna
+          return (
+            <Column
+              key={columnTitle}
+              title={columnTitle}
+              tasks={columnTasks} // Passamos a lista filtrada
+              onEdit={handleOpenEditModal} // Passamos a função de editar
+              onDelete={handleDelete} // Passamos a função de deletar
+            />
+          );
+        })}
+      </main>
+
+      {/* O Modal (não muda nada aqui) */}
       {isModalOpen && (
         <TaskFormModal
           onClose={handleCloseModal}
