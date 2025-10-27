@@ -1,30 +1,59 @@
-import type { Task } from '../App';
+// frontend/src/components/TaskCard.tsx
 
-// 1. Definindo as "Props" (Propriedades) que este componente recebe
+import type { Task } from '../App';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+// 1. As Props (estão corretas)
 interface TaskCardProps {
   task: Task;
   onEdit: (task: Task) => void;
   onDelete: (id: string) => void;
 }
 
-// 2. O Componente
-// Ele recebe as props e as usa para renderizar o JSX
+// 2. O Componente (está correto)
 export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
+
+  // 3. A lógica D&D (está correta)
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: task.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  // 4. O JSX (AQUI ESTÁ A CORREÇÃO)
   return (
-    // Este é o MESMO JSX que tínhamos no App.tsx
-    <div className="bg-zinc-800 p-4 rounded-lg shadow-md relative">
+    // Aplicamos o D&D DIRETAMENTE neste 'div' (o único 'div' pai)
+    <div
+      ref={setNodeRef}   // O 'ref' do dnd-kit
+      style={style}      // Os estilos de D&D
+      {...attributes}  // Props do dnd-kit
+      {...listeners}   // "Ouvintes" de clique/arraste
+      className="bg-zinc-800 p-4 rounded-lg shadow-md relative" // Nossas classes de estilo
+    >
       
+      {/* TUDO agora está DENTRO do 'div' arrastável.
+        Não há mais um 'div' duplicado.
+      */}
+
       {/* Botões de Ação */}
       <div className="absolute top-2 right-2 flex gap-2">
         <button
-          onClick={() => onEdit(task)} // Chama a função onEdit que veio do "pai"
+          onClick={() => onEdit(task)}
           className="text-zinc-400 hover:text-yellow-500 transition-colors"
           title="Editar tarefa"
         >
           &#9998; {/* Lápis */}
         </button>
         <button
-          onClick={() => onDelete(task.id)} // Chama a função onDelete que veio do "pai"
+          onClick={() => onDelete(task.id)}
           className="text-zinc-400 hover:text-red-500 transition-colors"
           title="Excluir tarefa"
         >

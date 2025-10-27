@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { TaskFormModal } from './components/TaskFormModal';
 import { Column } from './components/Column';
+import { DndContext, type DragEndEvent } from '@dnd-kit/core';
 
 // 2. A interface agora é usada pelos dois arquivos,
 //    então vamos "exportá-la" para o Modal poder importar
@@ -80,6 +81,60 @@ function App() {
   }
 }
 
+// ------- A LÓGICA DO DRAG AND DROP -----------//
+function handleDragEnd(event: DragEndEvent) {
+  const { active, over } = event;
+
+  // Se o usuário soltou fora de uma coluna ('over' é nulo)
+  if (!over) {
+    return;
+  }
+
+  // 'active.id' é o ID da Task que estamos arrastando
+  const taskId = active.id as string;
+  // 'over.id' é o ID da Coluna onde soltamos
+  const newStatus = over.id as string;
+
+  // Encontra a tarefa que foi movida
+  const taskToMove = tasks.find((task) => task.id === taskId);
+
+  // Se não achar a tarefa ou se o status já for o mesmo, não faz nada
+  if (!taskToMove || taskToMove.status === newStatus) {
+    return;
+  }
+
+  // 1. Otimismo! Atualiza o frontend IMEDIATAMENTE
+  // (Isso faz a UI ser super rápida)
+  setTasks((tarefasAnteriores) =>
+    tarefasAnteriores.map((task) =>
+      task.id === taskId ? { ...task, status: newStatus } : task
+    )
+  );
+
+  // 2. Prepara o payload para o backend
+  const updatedTaskPayload = {
+    ...taskToMove,
+    status: newStatus,
+  };
+
+  // 3. Envia a requisição PUT para o backend
+  // (Usamos uma função "anônima" para reusar a lógica de 'fetch')
+  fetch(`http://localhost:3000/api/tasks/${taskId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updatedTaskPayload),
+  })
+  .catch((error) => {
+    // Se o backend falhar, revertemos a mudança no frontend (rollback)
+    console.error("Falha ao atualizar no backend:", error);
+    setTasks((tasks) =>
+      tasks.map((task) =>
+        task.id === taskId ? taskToMove : task // Volta ao estado original
+      )
+    );
+    alert("Não foi possível mover o card. Tente novamente.");
+  });
+}
 
 // 3. NOVAS FUNÇÕES PARA ABRIR/FECHAR O MODAL
   function handleOpenCreateModal() {
@@ -101,7 +156,7 @@ function App() {
 
   // 4. O JSX (limpo!)
   return (
-    // MODIFICADO: min-h-screen agora tem 'overflow-x-auto' para scroll horizontal
+    // O <div> principal
     <div className="min-h-screen bg-zinc-900 text-white p-8 overflow-x-auto">
       
       {/* Header (não muda) */}
@@ -117,30 +172,36 @@ function App() {
         </button>
       </header>
 
-      {/* MODIFICADO: A "Lista de Tarefas" agora é um "Quadro" (Board) */}
-      {/* 'flex gap-6' vai alinhar as colunas lado a lado */}
-      <main className="flex gap-6 max-w-6xl mx-auto">
-        
-        {/* Mapeamos o array de COLUNAS (e não de tarefas) */}
-        {columns.map((columnTitle) => {
+      {/* AQUI ESTÁ A CORREÇÃO:
+        1. O DndContext vem PRIMEIRO.
+        2. O <main> vem DEPOIS (só uma vez).
+        3. O columns.map vem DENTRO de <main> (só uma vez).
+      */}
+      <DndContext onDragEnd={handleDragEnd}>
+        <main className="flex gap-6 max-w-6xl mx-auto">
           
-          // 1. FILTRAMOS as tarefas que pertencem a esta coluna
-          const columnTasks = tasks.filter(
-            (task) => task.status === columnTitle
-          );
+          {/* Mapeamos o array de COLUNAS */}
+          {columns.map((columnTitle) => {
+            
+            // 1. FILTRAMOS as tarefas que pertencem a esta coluna
+            const columnTasks = tasks.filter(
+              (task) => task.status === columnTitle
+            );
 
-          // 2. Renderizamos o componente Coluna
-          return (
-            <Column
-              key={columnTitle}
-              title={columnTitle}
-              tasks={columnTasks} // Passamos a lista filtrada
-              onEdit={handleOpenEditModal} // Passamos a função de editar
-              onDelete={handleDelete} // Passamos a função de deletar
-            />
-          );
-        })}
-      </main>
+            // 2. Renderizamos o componente Coluna
+            return (
+              <Column
+                key={columnTitle}
+                title={columnTitle}
+                tasks={columnTasks} // Passamos a lista filtrada
+                onEdit={handleOpenEditModal} // Passamos a função de editar
+                onDelete={handleDelete} // Passamos a função de deletar
+              />
+            );
+          })}
+
+        </main>
+      </DndContext>
 
       {/* O Modal (não muda nada aqui) */}
       {isModalOpen && (
